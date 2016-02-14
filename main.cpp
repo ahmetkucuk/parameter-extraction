@@ -62,10 +62,11 @@ int main(int argc, char *argv[])
 
     int counter = 0;
     FileReader reader(filein);
-    std::string line = reader.next();
+    string line = reader.next();
     while(counter < offset) {
-        line = reader.next();
         counter++;
+        cout << line << endl;
+        line = reader.next();
     }
 
     #pragma omp parallel
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
         {
             while(!line.empty() && counter < offset + limit) {
                 
-                #pragma omp task
+                #pragma omp task firstprivate(line)
                 {
 
                     string finalOutputDir = dirOut;
@@ -94,7 +95,7 @@ int main(int argc, char *argv[])
                 }
                 
                 counter++;
-                line = reader.next();
+                line = reader.next();   
             }
         }
 
