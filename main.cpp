@@ -17,13 +17,11 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <thread>
-#include <ctime>
+#include <vector>
 #include <stdlib.h>
 
 
 #include <ctime>
-#include <vector>
 #include "math.h"
 
 #include "helper.h"
@@ -36,23 +34,6 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 // Command-line arguments need to match otw, exit
 
-
-std::vector<std::thread> Pool;
-
-void waitUntilThreadsFinsihed() {
-
-    for (std::vector<thread>::iterator it = Pool.begin() ; it != Pool.end(); ++it) {
-        (*it).join();
-    }
-    Pool.clear();
-    
-//
-    //for(int i = 0; i < Pool.size(); i++) {
-    //    Pool.at(i).join();
-    //    Pool.at(i).
-    //    Pool.erase(Pool.begin() + i);
-    //}
-}
 
 int main(int argc, char *argv[])
 {
@@ -74,11 +55,11 @@ int main(int argc, char *argv[])
     int limit = atoi(argv[7]);
     //int statFE = runFE(filein, dirOut, segSplits, thSiz);
     //if (statFE ==1) {
-	//	cout << "Feature Extraction Failed" << endl;
-	//	return 1;
-	//} else {
-	//	return 0;
-	//}
+    //  cout << "Feature Extraction Failed" << endl;
+    //  return 1;
+    //} else {
+    //  return 0;
+    //}
 //
     FileReader reader(filein);
     std::string line = reader.next();
@@ -86,7 +67,7 @@ int main(int argc, char *argv[])
     #pragma omp parallel 
     {
         #pragma omp for
-        for(;!line.empty() && counter < offset + limit;) {
+        for(int m = 0;!line.empty() && counter < offset + limit; m++) {
 
             if(counter < offset) {
                 continue;
