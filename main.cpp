@@ -17,7 +17,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
+#include <ctime>
 #include <stdlib.h>
 
 
@@ -33,7 +33,6 @@
 using namespace std;
 //////////////////////////////////////////////////////////////////////
 // Command-line arguments need to match otw, exit
-
 
 int main(int argc, char *argv[])
 {
@@ -55,54 +54,58 @@ int main(int argc, char *argv[])
     int limit = atoi(argv[7]);
     //int statFE = runFE(filein, dirOut, segSplits, thSiz);
     //if (statFE ==1) {
-    //  cout << "Feature Extraction Failed" << endl;
-    //  return 1;
-    //} else {
-    //  return 0;
-    //}
+	//	cout << "Feature Extraction Failed" << endl;
+	//	return 1;
+	//} else {
+	//	return 0;
+	//}
 //
+
+    int counter = 0;
     FileReader reader(filein);
     std::string line = reader.next();
-    int counter = 0;
-    #pragma omp parallel 
-    {
-        #pragma omp for
-        for(int m = 0;!line.empty() && counter < offset + limit; m++) {
-
-            if(counter < offset) {
-                continue;
-            }
-
-            string finalOutputDir = dirOut;
-            string finalFileName = line;
-            
-            if(LOCAL == 0) {
-                std::size_t found = line.find_last_of("/\\");
-                finalOutputDir = dirOut + line.substr(0,found) + "/";
-                system( ("mkdir -p " + finalOutputDir).c_str() );
-                finalFileName = "/data4/STORE/" + line;
-            }
-
-            int statFE = runFE(finalFileName, finalOutputDir, segSplits, thSiz);
-            if (statFE == 1) {
-                cout << "Feature Extraction Failed" << endl;
-            }
-            
-            /*
-            Pool.push_back(std::thread(runFE, line, dirOut, segSplits, thSiz));
-            if(Pool.size() >= threadCount) {
-                waitUntilThreadsFinsihed();
-            }
-            cout << line << endl;
-            */
-            counter++;
-            line = reader.next();
-        }
+    while(counter < offset) {
+        line = reader.next();
+        counter++;
     }
-    //waitUntilThreadsFinsihed();
 
-    clock_t end = clock();
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << "Total Time Elapsed: " << elapsed_secs << endl;
-    
+    #pragma omp parallel
+    {
+        #pragma omp single nowait
+        {
+            while(!line.empty() && counter >= offset + limit) {
+
+                #pragma omp taskm
+                {
+
+                    string finalOutputDir = dirOut;
+                    string finalFileName = line;
+                    
+                    if(LOCAL == 0) {
+                        std::size_t found = line.find_last_of("/\\");
+                        finalOutputDir = dirOut + line.substr(0,found) + "/";
+                        system( ("mkdir -p " + finalOutputDir).c_str() );
+                        finalFileName = "/data4/STORE/" + line;
+                    }
+
+                    int statFE = runFE(finalFileName, finalOutputDir, segSplits, thSiz);
+                    if (statFE == 1) {
+                        cout << "Feature Extraction Failed " + finalFileName << endl;
+                    }
+                }
+                
+                counter++;
+                line = reader.next();
+            }
+        }
+
+        #pragma omp taskwait
+        {
+            clock_t end = clock();
+            double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+            cout << "Total Time Elapsed: " << elapsed_secs << endl;
+        }
+        
+    }
+    return 0;
 }

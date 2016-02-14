@@ -1,6 +1,6 @@
 
 sdoFE : main.o helper.o FE.o
-	g++ -ggdb `pkg-config --cflags opencv` -debug -O1 -Wall main.o helper.o FE.o FileReader.o -o sdoFE -L/usr/lib64/ -I/usr/local/include -lm -lcfitsio -larmadillo -lgsl `pkg-config --libs opencv`
+	g++ -ggdb -fopenmp `pkg-config --cflags opencv` -debug -O1 -Wall main.o helper.o FE.o FileReader.o -o sdoFE -L/usr/lib64/ -I/usr/local/include -lm -lcfitsio -larmadillo -lgsl `pkg-config --libs opencv`
 main.o: main.cpp helper.h FE.h
 	g++ -c -fopenmp main.cpp FileReader.cpp
 
