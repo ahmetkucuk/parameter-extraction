@@ -81,46 +81,42 @@ int main(int argc, char *argv[])
 	//}
 //
     FileReader reader(filein);
-    std::string line;
+    std::string line = reader.next();
     int counter = 0;
-    while(true) {
+    #pragma omp parallel 
+    {
+        #pragma omp for
+        for(;!line.empty() && counter < offset + limit;) {
 
-        line = reader.next();
-        if(line.empty()) {
-            break;
-        }
+            if(counter < offset) {
+                continue;
+            }
 
-        if(counter < offset) {
-            continue;
-        }
+            string finalOutputDir = dirOut;
+            string finalFileName = line;
+            
+            if(LOCAL == 0) {
+                std::size_t found = line.find_last_of("/\\");
+                finalOutputDir = dirOut + line.substr(0,found) + "/";
+                system( ("mkdir -p " + finalOutputDir).c_str() );
+                finalFileName = "/data4/STORE/" + line;
+            }
 
-        if(counter >= offset + limit) {
-            break;
+            int statFE = runFE(finalFileName, finalOutputDir, segSplits, thSiz);
+            if (statFE == 1) {
+                cout << "Feature Extraction Failed" << endl;
+            }
+            
+            /*
+            Pool.push_back(std::thread(runFE, line, dirOut, segSplits, thSiz));
+            if(Pool.size() >= threadCount) {
+                waitUntilThreadsFinsihed();
+            }
+            cout << line << endl;
+            */
+            counter++;
+            line = reader.next();
         }
-
-        string finalOutputDir = dirOut;
-        string finalFileName = line;
-        
-        if(LOCAL == 0) {
-            std::size_t found = line.find_last_of("/\\");
-            finalOutputDir = dirOut + line.substr(0,found) + "/";
-            system( ("mkdir -p " + finalOutputDir).c_str() );
-            finalFileName = "/data4/STORE/" + line;
-        }
-
-        int statFE = runFE(finalFileName, finalOutputDir, segSplits, thSiz);
-        if (statFE == 1) {
-            cout << "Feature Extraction Failed" << endl;
-        }
-        
-        /*
-        Pool.push_back(std::thread(runFE, line, dirOut, segSplits, thSiz));
-        if(Pool.size() >= threadCount) {
-            waitUntilThreadsFinsihed();
-        }
-        cout << line << endl;
-        */
-        counter++;
     }
     //waitUntilThreadsFinsihed();
 
