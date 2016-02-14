@@ -18,12 +18,11 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
+#include <omp.h>
 #include <stdlib.h>
 
 
-#include <ctime>
 #include "math.h"
-
 #include "helper.h"
 #include "FE.h"
 #include "FileReader.cpp"
@@ -37,7 +36,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    clock_t begin = clock();
+    time_t begin = time(0);
 
     if(argc < 4)
     {
@@ -73,9 +72,9 @@ int main(int argc, char *argv[])
     {
         #pragma omp single nowait
         {
-            while(!line.empty() && counter >= offset + limit) {
-
-                #pragma omp taskm
+            while(!line.empty() && counter < offset + limit) {
+                
+                #pragma omp task
                 {
 
                     string finalOutputDir = dirOut;
@@ -99,11 +98,14 @@ int main(int argc, char *argv[])
             }
         }
 
-        #pragma omp taskwait
+        #pragma omp barrier
         {
-            clock_t end = clock();
-            double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-            cout << "Total Time Elapsed: " << elapsed_secs << endl;
+            #pragma omp single
+            {
+                time_t end = time(0);
+                double elapsed_secs = difftime(end, begin);
+                cout << "Total Time Elapsed: " << elapsed_secs << endl;
+            }
         }
         
     }
