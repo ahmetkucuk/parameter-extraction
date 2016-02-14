@@ -27,7 +27,6 @@
 #include "FE.h"
 #include "FileReader.cpp"
 
-#define LOCAL 1
 
 using namespace std;
 //////////////////////////////////////////////////////////////////////
@@ -51,6 +50,7 @@ int main(int argc, char *argv[])
     int threadCount =atoi(argv[5]);
     int offset = atoi(argv[6]);
     int limit = atoi(argv[7]);
+    int LOCAL = atoi(argv[8]);
     //int statFE = runFE(filein, dirOut, segSplits, thSiz);
     //if (statFE ==1) {
 	//	cout << "Feature Extraction Failed" << endl;
@@ -65,7 +65,6 @@ int main(int argc, char *argv[])
     string line = reader.next();
     while(counter < offset) {
         counter++;
-        cout << line << endl;
         line = reader.next();
     }
 
