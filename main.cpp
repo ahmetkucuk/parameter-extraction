@@ -94,7 +94,8 @@ int main(int argc, char *argv[])
                 }
                 
                 counter++;
-                line = reader.next();   
+                line = reader.next();
+                cout << "Progress Update: Finished = " + (counter  - offset) << endl;
             }
         }
 
