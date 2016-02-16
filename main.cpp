@@ -91,11 +91,12 @@ int main(int argc, char *argv[])
                     if (statFE == 1) {
                         cout << "Feature Extraction Failed " + finalFileName << endl;
                     }
+                    if((counter - offset) % 1000 == 0)
+                        cout << "Progress Update: Finished = " + (counter  - offset) << endl;
                 }
                 
                 counter++;
                 line = reader.next();
-                cout << "Progress Update: Finished = " + (counter  - offset) << endl;
             }
         }
 
