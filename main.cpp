@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         {
             while(!line.empty() && counter < offset + limit) {
                 
-                #pragma omp task firstprivate(line)
+                #pragma omp task private(line)
                 {
 
                     string finalOutputDir = dirOut;
@@ -95,8 +95,10 @@ int main(int argc, char *argv[])
                 
                 counter++;
                 line = reader.next();
-                if((counter - offset) % 1000 == 0)
-                    cout << "Progress Update: Read = " + (counter  - offset) << endl;
+                #pragma omp flush(counter)
+                {
+                    cout << counter << endl;   
+                }
             }
         }
 

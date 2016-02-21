@@ -85,6 +85,7 @@ void cvMatToArmaMat(cv::Mat &imaget, arma::mat &data) {
 		}
 	}
 	image.release();
+	imaget.release();
 	//delete [] input;
 
 }
